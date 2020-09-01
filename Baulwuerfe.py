@@ -25,28 +25,32 @@ def count_baul(file_list):
         comb = None
         leer_combo = None
         i = 0
-
+        end = False
         # Zuerst checken obs eine dreier combo gibt
         # Dann checken ob man eine leerer combo hat
         for i in range(len(file_list[x])):
             if file_list[x][i] == 1:
+                end = False
                 if last_i is not None:
                     if last_i_2 is not None:
-                        comb = i
+                        if comb is not None:
+                            end = True
+                            combs_middle.append([x, comb])
+                            last_i = last_i_2
+                            last_i_2 = comb
+                            comb = i
+                        else:
+                            comb = i
                     else:
                         last_i_2 = i
                 else:
                     if leer_combo is not None:
                         combs_leer.append([x, i - 1])
-                        leer_combo = None
                     last_i = i
                     leer_combo = None
 
-                if comb is not None:
+                if comb is not None and not end:
                     combs_middle.append([x, last_i_2])
-                    last_i = None
-                    last_i_2 = None
-                    comb = None
 
 
             else:
@@ -76,7 +80,7 @@ def count_baul(file_list):
         if comb in full_leer_comb:
             count += 1
 
-    print(count)
+    return count
 
 
 def main(filename):
@@ -86,4 +90,4 @@ def main(filename):
 
 
 if __name__ == '__main__':
-    main(filename="karte0.txt")
+    print(main(filename="karte6.txt"))
