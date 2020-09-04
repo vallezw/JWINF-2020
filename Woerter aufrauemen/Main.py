@@ -17,6 +17,7 @@ def get_text(line1, words):
 
                 for k in range(0, len(i)):
                     if [i[k], k] in possib:
+                        
 
 
 if __name__ == '__main__':
