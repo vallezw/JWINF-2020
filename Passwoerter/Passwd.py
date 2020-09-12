@@ -99,4 +99,4 @@ def get_vokal_letter(before_letter):
         letter = choice(vokale)
     return letter
 
-print(get_new_random_string(12))
+print(get_new_random_string(10))
