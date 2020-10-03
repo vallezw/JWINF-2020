@@ -1,12 +1,12 @@
+import random
 from random import randrange
 from random import choice
-import random
-import string
+#import string
 
-# Regeln um ein ausprechbares wort zu erstellen:
-# 1. max 2 zahlen hintereinander
-# 2. Gleiche buchstaben müssen mind 3 zeichen abstand haben
-# 3. Anfangsbuhcstabe muss groß sein
+# Regeln, um ein ausprechbares Wort zu erstellen:
+# 1. Maximal 2 Zahlen hintereinander
+# 2. Gleiche Buchstaben müssen mindesterns 3 Zeichen Abstand haben
+# 3. Anfangsbuchstabe muss groß geschrieben sein
 # Vokal dann konsonant im abwechseln
 
 # Vokal Vok Kons Vok kons vok kons vok kons
@@ -99,4 +99,4 @@ def get_vokal_letter(before_letter):
         letter = choice(vokale)
     return letter
 
-print(get_new_random_string(10))
+print(get_new_random_string(18))
