@@ -1,4 +1,5 @@
 def get_file_stuff(file):
+    file.readline()
     hoehe = int(file.readline())
 
     datei_zeilen = []
