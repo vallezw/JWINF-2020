@@ -172,6 +172,6 @@ class PasswordGenerator:
 
 
 client = PasswordGenerator()
-pw = client.create_password(10)
+pw = client.create_password(16)
 print(pw, len(pw))
 

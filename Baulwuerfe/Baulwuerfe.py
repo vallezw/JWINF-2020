@@ -1,5 +1,4 @@
 def get_file_stuff(file):
-    breite = int(file.readline())
     hoehe = int(file.readline())
 
     file_list = []
@@ -89,4 +88,4 @@ def main(filename):
     return count_baul(file_list)
 
 if __name__ == '__main__':
-    print(main(filename="karte6.txt"))
+    print(main(filename="karte0.txt"))
