@@ -1,18 +1,18 @@
 def get_file_stuff(file):
     hoehe = int(file.readline())
 
-    file_list = []
+    datei_zeilen = []
 
     for i in range(0, hoehe):
-        list = []
+        zeile = []
         for x in file.readline():
             if x == "X":
-                list.append(1)
+                zeile.append(1)
             else:
-                list.append(0)
-        file_list.append(list)
+                zeile.append(0)
+        datei_zeilen.append(zeile)
 
-    return file_list
+    return datei_zeilen
 
 
 def count_baul(file_list):
