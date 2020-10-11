@@ -86,8 +86,7 @@ def count_baul(file_list):
 def main(filename):
     file1 = open(filename, "r")
     file_list = get_file_stuff(file1)
-    count_baul(file_list)
-
+    return count_baul(file_list)
 
 if __name__ == '__main__':
     print(main(filename="karte6.txt"))
