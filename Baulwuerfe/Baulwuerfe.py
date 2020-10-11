@@ -19,20 +19,19 @@ def get_file_stuff(file):
 def count_baul(file_list):
     combs_middle = []
     combs_leer = []
-    for x in range(len(file_list)):
+    for x in range(len(file_list)):             # x durchläuft die Zeilen im Feld
         last_i = None
         last_i_2 = None
-        comb = None
-        leer_combo = None
-        i = 0
-        end = False
-        # Zuerst checken obs eine dreier combo gibt
+        comb = None                             # Variable, die mir 3er Kombo XXX anzeigt
+        leer_combo = None                       # Flag, dass mir
+        end = False                             # Diese Flag benutzt ich für ...
+        # Zuerst checken, ob es in der Zeile eine dreier combo gibt
         # Dann checken ob man eine leerer combo hat
-        for i in range(len(file_list[x])):
-            if file_list[x][i] == 1:
+        for i in range(len(file_list[x])):      # i durchläuft die Süpalten in der x'ten Zeile
+            if file_list[x][i] == 1:            # 1 bedeutet Maulwurfhügel
                 end = False
                 if last_i is not None:
-                    if last_i_2 is not None:
+                    if last_i_2 is not None:    # Volle 3er Kombo gefunden!
                         if comb is not None:
                             end = True
                             combs_middle.append([x, comb])
