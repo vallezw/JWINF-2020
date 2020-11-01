@@ -3,14 +3,19 @@ from random import choice
 from random import randrange
 
 # Konsonanten
-konsonanten = ["B", "C", "D", "F", "G", "H", "J", "K", "L", "M", "N", "P", "R", "S", "T", "V", "W", "X", "Y", "Z"]
-doppelkonsonanten = ['nn', 'mm', 'll', 'ss', 'tt', 'ff']
-sonderfolgen = ["SCH", "SP", "ST", "CH", "PH"]
-sonderfolgen_2 = ["SP", "ST", "CH", "PH", "QU"]
+KONSONANTEN = ["B", "D", "F", "G", "H", "K", "L", "M", "N", "P", "R", "S", "T", "V", "W"]
+KONSONANTEN_SELTEN = ["C", "J", "X", "Y", "Z"]
+DOPPELKONSONANTEN = ["NN", "MM", "LL", "SS", "TT", "FF"]
+
+SONDERFOLGEN_2 = ["SP", "ST", "CH", "PH", "QU", "CK"]
+SONDERFOLGEN = SONDERFOLGEN_2 + ["SCH"]
+SONDERFOLGEN_ANFANG_2 = ["SP", "ST", "CH", "PH", "QU"]
+SONDERFOLGEN_ANFANG = SONDERFOLGEN_ANFANG_2 + ["SCH"]
+
 # Vokale
-vokale = ["A", "E", "I", "O", "U"]
-umlaute = ["AE", "UE", "OE", "AU", "EU", "EI", "AI"]
-doppelvokale = ["AA", "AH", "EE", "EH", "UH", "OH", "OO", "IE"]
+VOKALE = ["A", "E", "I", "O", "U"]
+UMLAUTE = ["AE", "UE", "OE", "AU", "EU", "EI", "AI"]
+DOPPELVOKALE = ["AA", "AH", "EE", "EH", "UH", "OH", "OO", "IE"]
 
 # Regeln:
 # 0) Allgemein gilt bei Zeichen: Zufall
@@ -19,7 +24,7 @@ doppelvokale = ["AA", "AH", "EE", "EH", "UH", "OH", "OO", "IE"]
 # 2) Am Anfang oder nach einer Zahl 75% Wahrsch. groß
 # 3) Mit Wahrsch 15% kommt eine Zahl, Zahl nach Zahl möglich, aber unwahrscheinlich
 # 4) Nach einer Zahl wie am Wortanfang starten (Groß / Klein etc)
-# 5) Passwort enthält immer eine Zahl, wenn nicht per Zufall beim generieren der ersten Zeichen, dann am Ende
+# 5) Passwort enthält immer eine Zahl, wenn nicht per Zufall beim Generieren der ersten Zeichen, dann am Ende
 # 6) Passwort enthält immer einen Großbuchstaben, wenn nicht per Zufallsalgo, wird der erste groß gesetzt
 
 
@@ -33,8 +38,8 @@ class PasswordGenerator:
         self.vokal = None
 
     def create_password(self, length):
-        if length < 3:
-            print("Length too short")
+        if length < 5:
+            print("Length too short, minimum 5 letters!")
             return "error"
 
         # First char of password
@@ -47,41 +52,46 @@ class PasswordGenerator:
                 letter = self._first_letter_algorithm(length)
             else:
                 self.letter_num = False
-                random_num = self._random_num()  # Zufallszahl zwischen 1 und 100
-                # letter = ""
-                if random_num <= 15:             # Mit 15% Wahrsch eine Zahl
+                random_num = self._random_num()     # Zufallszahl zwischen 1 und 100
+                if random_num <= 10:                # Mit 10% Wahrsch eine Zahl
                     letter = str(randrange(0, 9))
                     self.letter_num = True
                     self.jemals_num = True
                     self.i += 1
-                elif self.vokal:                # Vorher Vokal, also nun Konsonant
+                elif self.vokal:                    # Vorher Vokal, also nun Konsonant
                     self.vokal = False
-                    if random_num <= 70: # Einfacher Konsonant mit 70-15%= 55% Wahrsch
-                        letter = choice(konsonanten).lower()
+                    if random_num <= 75:            # Einfacher Konsonant mit 75-10%= 65% Wahrsch
+                        if self._random_konsonant():
+                            letter = choice(KONSONANTEN).lower()
+                        else:
+                            letter = choice(KONSONANTEN_SELTEN).lower()
                         self.i += 1
-                    elif random_num <= 90: # Doppelkonsonant
-                        letter = choice(doppelkonsonanten).lower()
+                    elif random_num <= 90:          # Doppelkonsonant
+                        letter = choice(DOPPELKONSONANTEN).lower()
                         self.i += 2
                     else:
                         if length-self.i > 3:
-                            letter = choice(sonderfolgen).lower()
+                            letter = choice(SONDERFOLGEN).lower()
                         else:
-                            letter = choice(sonderfolgen_2).lower()
+                            letter = choice(SONDERFOLGEN_2).lower()
                         self.i += len(letter)
 
-                else:                     # Vorher Konsonant, also nun Vokal
+                else:                               # Vorher Konsonant, also nun Vokal
                     self.vokal = True
-                    if random_num <= 70:  # Einfacher Vokal mit 70-15%= 55% Wahrsch
-                        letter = choice(vokale).lower()
+                    if random_num <= 80:            # Einfacher Vokal mit 80-15%= 65% Wahrsch
+                        letter = choice(VOKALE).lower()
                         self.i += 1
-                    elif random_num <= 90:  # Doppelvokal
-                        letter = choice(doppelvokale).lower()
+                    elif random_num <= 90:          # Doppelvokal mit 10% Wahrsch
+                        letter = choice(DOPPELVOKALE).lower()
                         self.i += 2
-                    else:
-                        letter = choice(umlaute).lower()
+                    else:                           # Umlaut mit 10% Wahrsch
+                        letter = choice(UMLAUTE).lower()
                         self.i += 2
             self.password += letter
 
+        # Da wir ja doppelfolgen von Buchstaben zulassen, kann es bei der vorherigen while-Schleife sein, dass
+        # wir schon die geforderte Anzahl an Buchstaben haben. In der Regel ist aber noch eine Stelle frei.
+        # Diese wird nun besetzt. Wir nutzen es, um eine Zahl zu vergeben, wenn noch keine im Wort ist
         if len(self.password) < length:
             if  self.jemals_num == False:
                 letter = str(randrange(0, 9))
@@ -90,71 +100,93 @@ class PasswordGenerator:
 
             else:
                 if self.vokal == True:
-                    letter = choice(konsonanten).lower()
+                    if self._random_konsonant():
+                        letter = choice(KONSONANTEN).lower()
+                    else:
+                        letter = choice(KONSONANTEN_SELTEN).lower()
                 else:
-                    letter = choice(vokale).lower()
+                    letter = choice(VOKALE).lower()
             self.i += 1
             self.password += letter
 
+        else:
+            if self.jemals_num == False:
+                # self.password = str(randrange(0, 9)) + self.password[1:]
+                self.password = self.password[:-1] + str(randrange(0, 9))
+                # print("Letzten Buchstaben zur Zahl gemacht")
+
         if self.jemals_gross == False:
-            self.password = self.password.capitalize()
+            if not self.password[0].isnumeric():
+                self.password = self.password.capitalize()
+            else:
+                str1 = ""
+                cap = False
+                for x in self.password:
+                    if not cap and not x.isnumeric():
+                        x = x.upper()
+                        cap = True
+                    str1 += x
+                self.password = str1
             print("Ersten Buchstaben groß gemacht")
 
-        if self.jemals_num == False:
-            self.password = self.password[:-1] + str(randrange(0, 9))
-            print("Letzte Buchstaben zur Zahl gemacht")
+        # Hier ist der seltene Fall, dass
+
 
         return self.password
 
+    # Liefert ein zufälliges erstes Zeichen bzw. eine Zeichenfolge
     def _first_letter_algorithm(self, length):
-        # Liefert einen zufälliges erstes Zeichen bzw. eine Zeichenfolge
-        random_num = self._random_num()         # Zufallszahl zwischen 1 und 100
+        random_num = self._random_num()             # Zufallszahl zwischen 1 und 100
         letter = ""
         self.letter_num = False
         self.vokal = False
 
         if random_num <= 30:                        # Einfacher Vokal mit 30% Wahrsch
-            if self._random_capital():              # Großbuchstabe
-                letter = choice(vokale)
+            if self._random_capital():              # Großbuchstabe mit gewisser Wahrsch. (aktuell 75%)
+                letter = choice(VOKALE)
                 self.jemals_gross = True
-            else:                                   # Kleinbuschstabe
-                letter = choice(vokale).lower()
+            else:                                   # Kleinbuschstabe mit gewisser Wahrsch
+                letter = choice(VOKALE).lower()
             self.vokal = True
             self.i += 1
 
-        elif random_num <= 40:                      # Umlaut mit 10% (am Anfang eher kein Doppelvokal)
+        elif random_num <= 40:                      # Umlaut mit 10% (am Anfang kein Doppelvokal)
             if self._random_capital():              # Großbuchstabe am Anfang
-                letter = choice(umlaute).lower().capitalize()
+                letter = choice(UMLAUTE).lower().capitalize()
                 self.jemals_gross = True
             else:                                   # Kleinbuchstabe am Anfang
-                letter = choice(umlaute).lower()
+                letter = choice(UMLAUTE).lower()
             self.vokal = True
             self.i += 2
 
         elif random_num <= 75:                      # Einfacher Konsonant mit 35%
+            if self._random_konsonant():
+                kons = choice(KONSONANTEN)
+            else:
+                kons = choice(KONSONANTEN_SELTEN)
             if self._random_capital():              # Großbuchstabe
-                letter = choice(konsonanten)
+                letter = kons
                 self.jemals_gross = True
-            else:                                   # Kleinbuschstabe
-                letter = choice(konsonanten).lower()
+            else:                                   # Kleinbuchstabe
+                letter = kons.lower()
             self.i += 1
 
         elif random_num <= 85:                      # Sonderfolge mit 10%
             if length-self.i < 3:
                 if self._random_capital():
-                    letter = choice(sonderfolgen_2).lower().capitalize()
+                    letter = choice(SONDERFOLGEN_ANFANG_2).lower().capitalize()
                     self.jemals_gross = True
                 else:
-                    letter = choice(sonderfolgen_2).lower()
+                    letter = choice(SONDERFOLGEN_ANFANG_2).lower()
             else:
                 if self._random_capital():
-                    letter = choice(sonderfolgen).lower().capitalize()
+                    letter = choice(SONDERFOLGEN_ANFANG).lower().capitalize()
                     self.jemals_gross = True
                 else:
-                    letter = choice(sonderfolgen).lower()
+                    letter = choice(SONDERFOLGEN_ANFANG).lower()
             self.i+= len(letter)
 
-        else:                               # also 15% Wahrsch. --> Zahl
+        else:                                   # also 15% Wahrsch. --> Zahl
             letter = str(randrange(0, 9))
             self.letter_num = True
             self.jemals_num = True
@@ -163,8 +195,12 @@ class PasswordGenerator:
         return letter
 
     def _random_capital(self):
-        # Liefert mit 25% Wahrscheinlichkeit True, sonst False
+        # Liefert mit 75% Wahrscheinlichkeit True, sonst False
         return self._random_num() > 25
+
+    def _random_konsonant(self):
+        # Liefert mit 90% Wahrscheinlichkeit True, sonst False
+        return self._random_num() > 10
 
     def _random_num(self):
         # Random number between 1 and 100
@@ -172,6 +208,6 @@ class PasswordGenerator:
 
 
 client = PasswordGenerator()
-pw = client.create_password(16)
+pw = client.create_password(10)
 print(pw, len(pw))
 
