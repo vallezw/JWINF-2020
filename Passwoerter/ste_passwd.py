@@ -17,6 +17,9 @@ VOKALE = ["A", "E", "I", "O", "U"]
 UMLAUTE = ["AE", "UE", "OE", "AU", "EU", "EI", "AI"]
 DOPPELVOKALE = ["AA", "AH", "EE", "EH", "UH", "OH", "OO", "IE"]
 
+# Steuergroessen
+MINLAENGE = 5
+
 # Regeln:
 # 0) Allgemein gilt bei Zeichen: Zufall
 # 1) In der Regel abwechselnd Vokal & Konsonant
@@ -38,8 +41,9 @@ class PasswordGenerator:
         self.vokal = None
 
     def create_password(self, length):
-        if length < 5:
-            print("Length too short, minimum 5 letters!")
+        # Prüfung, ob die minimale Passwortlänge gegeben ist
+        if length < MINLAENGE:
+            print(f"Length too short, minimum {MINLAENGE} letters!")
             return "error"
 
         # First char of password
@@ -172,7 +176,7 @@ class PasswordGenerator:
             self.i += 1
 
         elif random_num <= 85:                      # Sonderfolge mit 10%
-            if length-self.i < 3:
+            if length-self.i < 3:                   # Diese Abfrage braucht es eigentlich nicht mehr
                 if self._random_capital():
                     letter = choice(SONDERFOLGEN_ANFANG_2).lower().capitalize()
                     self.jemals_gross = True
@@ -207,7 +211,10 @@ class PasswordGenerator:
         return randrange(1, 100)
 
 
-client = PasswordGenerator()
-pw = client.create_password(10)
-print(pw, len(pw))
+for x in range(50):
+    client = PasswordGenerator()
+    pw = client.create_password(10)
+    print(pw, len(pw))
+
+
 
