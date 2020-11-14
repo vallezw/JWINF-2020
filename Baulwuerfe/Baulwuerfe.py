@@ -1,5 +1,8 @@
+# Routine zum Einlesen des Feldes
+# Der Routine wird der File-Pointer übergeben
+# Als Ergebnis liefert sie ein zweidimensionales Array aus Zeilen und Spalten gefüllt mit Nullen und Einsen
 def get_file_stuff(file):
-    file.readline()
+    file.readline()                 # Breiteninformation brauchen wir nicht
     hoehe = int(file.readline())
 
     datei_zeilen = []
