@@ -11,60 +11,69 @@ def get_file_stuff(file):
         zeile = []
         for x in file.readline():
             if x == "X":
-                zeile.append(1)
+                zeile.append(True)
             else:
-                zeile.append(0)
+                zeile.append(False)
         datei_zeilen.append(zeile)
 
     return datei_zeilen
 
-
+# Hauptroutine:
+# - Übergeben wird das als Array gespeicherte Feld,
+# - Ausgegeben die gezählte Zahl der Rechtecke
 def count_baul(file_list):
+# Erster Teil der Hauptroutine, in der ich die Dreierkombinationen im Array auffinde und die Positionen in die Liste speichere
     combs_middle = []
     combs_leer = []
     for x in range(len(file_list)):             # x durchläuft die Zeilen im Feld
-        last_i = None
+        last_i = None                           # Flag
         last_i_2 = None
         comb = None                             # Variable, die mir 3er Kombo XXX anzeigt
-        leer_combo = None                       # Flag, dass mir
+        leer_combo = False                       # Flag, dass mir
         end = False                             # Diese Flag benutzt ich für ...
         # Zuerst checken, ob es in der Zeile eine dreier combo gibt
         # Dann checken ob man eine leerer combo hat
-        for i in range(len(file_list[x])):      # i durchläuft die Süpalten in der x'ten Zeile
-            if file_list[x][i] == 1:            # 1 bedeutet Maulwurfhügel
-                end = False
-                if last_i is not None:
-                    if last_i_2 is not None:    # Volle 3er Kombo gefunden!
-                        if comb is not None:
+        for i in range(len(file_list[x])):      # i durchläuft die Spalten in der x'ten Zeile
+            if file_list[x][i]:                 # True bedeutet Maulwurfhügel (als X in der ursprünglichen Textdatei)
+                end = False                     # Flag, das ...
+                if last_i is not None:          # In der letzen Spalte war ein Hügel
+                    if last_i_2 is not None:    # In der vorletzen Spalte war ein Hügel --> Volle 3er Kombo gefunden!
+                        if comb is not None:    # Wir haben vier oder mehr Hügel hintereinander, daher müssen wir den Start einer
+                                                # neuen Kombo anzeigen mit der Flag end
+                            print("Hallo", x, i, last_i, last_i_2, comb)
                             end = True
                             combs_middle.append([x, comb])
                             last_i = last_i_2
                             last_i_2 = comb
-                            comb = i
-                        else:
-                            comb = i
+                        comb = i                # In jedem Fall halten wir in comb die Position fest, da XXX gefunden wurde
                     else:
                         last_i_2 = i
-                else:
-                    if leer_combo is not None:
+                else:                           # In der letzten Position war kein Baulwurfhügel
+                                                # Wir schauen in den Zwischenspeicher leer_combo, ob der aktuelle Hügel eine Leerkombination vervoillständigt
+                    if leer_combo:
                         combs_leer.append([x, i - 1])
-                    last_i = i
-                    leer_combo = None
+                    last_i = i                  # Wir vemerken den letzten Hügel und weiter geht es
+                    leer_combo = False
 
                 if comb is not None and not end:
                     combs_middle.append([x, last_i_2])
 
 
-            else:
+            else:                                       # Wenn kein Baulwurfhügel auf der Postion ist, gibt es zwei Möglichkeiten
                 if last_i is not None:
-                    leer_combo = i
+                    leer_combo = True                      # Es könnte noch eine X X Kombination sein, das merken wir uns für später
                 else:
-                    leer_combo = None
+                    leer_combo = False                   # Es ist keine X X Kombination, da zwei Positionen hintereinader ohne Hügel sind
 
-                last_i = None
+                last_i = None                           # In jedem Fall resetten wir jetzt wieder alle Flags/Variablen --> Suche beginnt neu
                 last_i_2 = None
                 comb = None
 
+    print(combs_middle)
+    print(combs_leer)
+
+
+# Zweiter Teil der Hauptroutine, in der ich aus den Listen die Rechtecke identifiziere und zähle
     count = 0
     half_comb = False
     full_leer_comb = []
