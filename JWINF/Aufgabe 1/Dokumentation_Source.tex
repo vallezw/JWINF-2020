@@ -1,0 +1,371 @@
+\documentclass[a4paper,10pt,ngerman]{scrartcl}
+\usepackage{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage[a4paper,margin=2.5cm,footskip=0.5cm]{geometry}
+\usepackage{longtable}
+
+% Die nächsten vier Felder bitte anpassen:
+\newcommand{\Aufgabe}{Aufgabe 1: Passwörter} % Aufgabennummer und Aufgabennamen angeben
+\newcommand{\Namen}{Valentin Stephan Zwerschke}           % Namen der Bearbeiter/-innen dieser Aufgabe angeben
+ 
+% Kopf- und Fußzeilen
+\usepackage{scrlayer-scrpage, lastpage}
+\setkomafont{pageheadfoot}{\large\textrm}
+\lohead{\Aufgabe}
+\cfoot*{\\\thepage{}/\pageref{LastPage}}
+
+% Position des Titels
+\usepackage{titling}
+\setlength{\droptitle}{-1.0cm}
+
+% Für mathematische Befehle und Symbole
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Für Bilder
+\usepackage{graphicx}
+
+% Für Algorithmen
+\usepackage{algpseudocode}
+
+% Für Quelltext
+\usepackage{listings}
+\usepackage{color}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+  language=Python,
+  keywordstyle=\color{blue},commentstyle=\color{mygreen},
+  stringstyle=\color{mymauve},rulecolor=\color{black},
+  basicstyle=\footnotesize\ttfamily,numberstyle=\tiny\color{mygray},
+  captionpos=b, % sets the caption-position to bottom
+  keepspaces=true, % keeps spaces in text
+  numbers=left, numbersep=5pt, showspaces=false,showstringspaces=true,
+  showtabs=false, stepnumber=2, tabsize=2, title=\lstname
+}
+\lstdefinelanguage{JavaScript}{ % JavaScript ist als einzige Sprache noch nicht vordefiniert
+  keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, void, while, with},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true
+}
+
+% Diese beiden Pakete müssen zuletzt geladen werden
+%\usepackage{hyperref} % Anklickbare Links im Dokument
+\usepackage{cleveref}
+
+% Daten für die Titelseite
+\title{\textbf{\Huge\Aufgabe}}
+\author{\LARGE \Namen\\\\}
+\date{\LARGE\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\vspace{0.5cm}
+
+\section{Lösungsidee}
+Prinzipiell sollen meine Passwörter aus einer zufälligen Folge von Zeichen bestehen. Zwecks leichterer Lesbarkeit und Merkbarkeit des Passworts habe ich einige Regeln definiert, wie die Zeichen aufeinander folgen dürfen. Generell lasse ich auf eine Vokalfolge eine Konsonantenfolge folgen und umgekehrt. Dabei definiere ich Konsonantenfolgen als entweder einen einfachen Konsonanten, einen Doppelkonsonanten (wie 'pp') oder eine im Deutschen gebräuchliche Konsonantenkombination (wie 'sch' oder 'ch'). Als Vokalfolge definiere ich entsprechend alle Vokale, Umlaute (in der Schreibweise mit nachgestelltem 'e', aber auch 'eu' oder 'ei') und gedehnte Vokale (Doppelvokal wie 'ee' oder Vokal mit nachgestelltem 'h'). 
+Zudem sollen im Passwort mit kleiner Wahrscheinlichkeit (ich defieniere diese als 15\%) an beleibiger Stelle auch Ziffern auftreten. Am Wortanfang sowie nach Ziffern 1-9 nutze ich mit hoher Wahrscheinlichkeit (75\%) Großschreibung, innerhalb des Passworts nur Kleinschreibung. Die Auswahl der verschiedenen Folgen geschieht mit einer definierten Wahrscheinlichkeit, wobei einfache Vokale und Konsonanten am häufigsten gewählt werden, gedehnte Vokale, Umlaute oder Konsonantenfolgen mit niedrigerer Wahrscheinlichkeit. 
+Merkwürdige Anfänge wie einen mit 'Ck'lasse ich nicht zu. 
+Zur Sicherheit sollen meine Passwörter immer mindestens eine Zahl enthalten und sowohl große als auch kleine Buchstaben verwenden. Sonderzeichen schließe ich allerdings aus. Wenn der Zufallsgenerator keine Zahl ins Passwort bringt oder keinen Großbuchstaben im gesamten Wort verwendet, wird als letztes Zeichen eine Zahl gewählt bzw. das erste Zeichen, das keine Zahl ist, groß geschrieben. 
+
+\section{Umsetzung}
+Mein Programm habe ich in der Programmiersprache Python umgesetzt. 
+Um zufäliige Zahlen zu bekommen oder eine zufällige Auswahl von Einträgen einer Liste, binde ich die Bilbliothek \textit{random} ein und verwende die Funktionen:
+\begin{itemize}
+    \item \textit{choice:} um aus einer Liste einen zufälligen eintrag zu wählen 
+    \item \textit{randrange:} um eine zufällige Zahl vom Typ integer zu bekommen
+\end{itemize}
+Ich definierne globale Arrays für bestimmte Buchstabengruppen (siehe Kapitel 4), die ich unterscheiden möchte bei der Verwendung:
+\begin{itemize}
+    \item Einfache Konsonanten, die in der deutschen Sprache häufig verwendet werden
+    \item Einfache Konsonanten, die seltener verwendet werden, wie z.B. 'x' oder 'y'
+    \item Folgen von Konsonanten, die in der deutschen Sprache vorkommen, wie z.B. 'sp' oder 'ck'
+    \item Vokale
+    \item Umlaute wie z.B. 'ae' oder 'ei'
+    \item Doppelvokale wie 'aa' bzw. gedehnte Vokale 'eh'
+\end{itemize}
+Ich habe die Routinen in einer Klasse \textit{PasswordGenerator} defineirt. Die Hauptroutine ist die Methode \textit{create\_password(length)} der Klasse \textit{PasswordGenerator}, der man die gewünschte Passwortlänge (muss größer als eine definiertre Zahl sein) als Parameter übergibt. Als Ergebnis liefert diese Methode das Passwort.\\
+Die Methode ruft zunächst eine weitere Methode der Klasse auf (\textit{\_first\_letter\_algorithm}), die das erste Zeichen bzw. die erste Zeichenfolge definiert. Im Anschluss werden mit einer \textit{While}-Schleife die weiteren Zeichen bzw. Zeichenfolgen definiert (beide Umsetzungen beschreibe ich weiter unten noch ausführlicher).\\
+Die \textit{While}-Schleife läuft allerdings nur bis 'Passwortlänge minus eins', sodass in der Regel noch ein Zeichen frei bleibt, das ich gezielt als Zahl setzen kann, wenn im Passwort bisher noch keine solche auftaucht. Da ich aber auch Zeichenfolgen (z.B. zwei Zeichen) zulasse, kann es sein, dass nach der \textit{While}-Schleife bereits alle Zeichen gesetzt sind und das Passwort fertig ist. In diesem Fall prüfe ich nur noch, ob eine Zahl enthalten ist und tausche im Fall, dass dem nicht so ist, noch das letzte Zeichen durch eine Zahl aus.\\
+Ganz zum Schluss prüfe ich noch, ob im Passwort ein Großbuchstabe enthalten ist. Wenn dem nicht so ist, wird der erste verwendete Buchstabe des Passworts durch einen Großbuchstaben ersetzt.\\
+
+Methode \textit{\_first\_letter\_algorithm(length)}: 
+Zunächst wird dabei mit der Methode \textit{\_random\_num} eine Zuallszahl zwischen 1 und 100 berechnet. Diese Zahl bestimmt, welche Art von Buchstaben gewählt wird. Hintereinander durchlaufene \textit{if/else}-Abfragen verwenden die zufällige Zahl, um verschiedene Fälle zu verwenden. So kann ich prinzipiell die Wahrscheinlichkeiten für das Auftreten von Zahlen, Sonderzeichen etc. steuern. 
+
+Methode \textit{create\_password}: Sie durchläuft mit einer \textit{While}-Schleife alle Zeichen des Passworts und definiert die zufälligen Zeichen unter berücksichtigung der definierten Regeln. Die Definition eines ersten Buchstabens (direkt am Passwortanfang oder mittendrin nach einer Zahl) wird mit der Methode \textit{\_first\_letter\_algorithm(length)} definiert. 
+Im Unterschied zur Methode \textit{\_first\_letter\_algorithm(length)} wird hier berücksichtigt, welche Art Zeichen vorausging. Direkt hinter Buchstaben folge ich dem Prinzip 'auf Vokal folgt Konsonant und umgekehrt'. Dafür verwende ich das Flag \textit{vokal}. Ansonsten nutze ich auch innerhalb des Passworts die Idee einer Zufallszahl, die die verschiednen Sonderfälle steuert.   
+
+\section{Beispiele}
+Hier eine Liste von Ergebnissen von Passwörtern der Länge 10 Zeichen: 
+
+\begin{center}
+\begin{tabular}{l|l|l|l|l}
+708Ot3keff & 0Kivehyitu & Ihebedetu8 & To7Ohitusp & Abipe6Fewu \\
+Efarettuc2 & Aphuschae5 & Utonesumu0 & Tihiesche7 & 1Utome3Afu \\
+Woossuf6Sp & Uschivego6 & 1Id7velleb & Ebibefode7 & f2Oetohw2i \\
+4Olonutoph & Spiegeimm5 & L4Umehspep & Foerallah5 & Ufi18Epaup \\
+Schuttast4 & 1Og8osp4aw & Sonnainum3 & Staxe3Efue & Eissokani6 \\
+Leriffiss6 & Schig574Po & Heffahspu3 & Ecenolada8 & Hoffaewie3 \\
+Efahttuti8 & Faufeemme4 & Saduttair8 & 1Stue8Kahr & 7Uchopupuh \\
+oenna4Stow & Molikijoo3 & Emmecumuc5 & T7Bevamovo & Phuw2Uebak \\
+oli0Iwoett & Omottulug2 & Buebiffig3 & Vutt1Amaar & soevau6Oqu \\
+A314Gell0e & Afuhittey5 & Iffurahdo1 & h7Ch3Fo2Wa & 2Vidoerahk \\
+\end{tabular}
+\end{center}
+Natürlich funktioniert es auch mit weniger oder mehr Zeichen. Allerdings habe ich definiert, dass es nicht weniger als 5 sein sollen. Hier eine Liste von Passwötern mit unterschiedlicher Länge.   
+\begin{center}
+\begin{longtable}{l|l|l}
+\textbf{8 Zeichen} & \textbf{10 Zeichen} & \textbf{14 Zeichen}\\
+\hline
+    Phasisi0  &  Bamu4Nivat  & Beistaavoscho1 \\
+    8Ulade0y  &  Zessib3Pha  & Muhopoefehmm7a \\
+    Doll8Ira  &  Stoesito4g  & Ahammeune8Ei3f \\
+    Ogawelo2  &  Olubommel1  & Ka1Galeb3Ulass \\
+    Ipifol8u  &  Oe8O0Haeff  & Estaluhi0Ael7u \\
+    ru8Etull  &  Chipallar7  & Gostesabiffos0 \\
+    Rafol3Oe & I76inauxoy & ph8Ennipurae1r \\
+    Immecop6 & Badivoesi2 & We2Acavowewupi \\
+    Chafeki4 & Omelophoo1 & 23Luhf0Ruekuwa \\
+    E8Schovi & asto4Paspe & Schuttahdammu3 \\
+    Baphool8 & Mannefust0 & Gopeduhulejee8 \\
+    Eisoxus4 & 22Rissirof & Upanedo7Avivuh \\
+    W55Tisog & Chojerari7 & 6P68Ataffammap \\
+    Uennuff5 & Ejuhfopuh2 & Olukeihoolles0 \\
+    Uehogor2 & Oevobetak2 & Ennemelugulle3 \\
+    O4Istisp & Apeemmott0 & Spovunatiquur6 \\
+    4Inakira & Levohhopi5 & Evobi3Rachespa \\
+    Ulallus4 & Agikaacho2 & Ev4A8Eibeckasu \\
+    Ennosun7 & Ottolimme4 & Uepasidowaven2 \\
+    Vehte0Ra & Umeuh3stol & 6Uteuckalebufo \\
+    Dussowo1 & Auffad1yof & Ettommeweetto4 \\
+    Avoyann7 & Schiduhph0 & Awennoffiwoos7 \\
+    Be1Suhwe & Eineeg65ke & 5I5Iffovidojad \\
+    Fauweno7 & Taimmulle6 & Phommittam27Nu \\
+    Phassuh5 & Il5Ahischu & Dulletae3Ennut \\
+\end{longtable}
+\end{center}
+
+
+
+\section{Quellcode}
+Hier die global definierten Listen an Voikal- und Konsonantenfolgen
+\begin{lstlisting}
+# Konsonanten
+KONSONANTEN = ["B", "D", "F", "G", "H", "K", "L", "M", "N", "P", "R", "S", "T", "V", "W"]
+KONSONANTEN_SELTEN = ["C", "J", "X", "Y", "Z"]
+DOPPELKONSONANTEN = ["NN", "MM", "LL", "SS", "TT", "FF"]
+
+SONDERFOLGEN_2 = ["SP", "ST", "CH", "PH", "QU", "CK"]
+SONDERFOLGEN = SONDERFOLGEN_2 + ["SCH"]
+SONDERFOLGEN_ANFANG_2 = ["SP", "ST", "CH", "PH", "QU"]
+SONDERFOLGEN_ANFANG = SONDERFOLGEN_ANFANG_2 + ["SCH"]
+
+# Vokale
+VOKALE = ["A", "E", "I", "O", "U"]
+UMLAUTE = ["AE", "UE", "OE", "AU", "EU", "EI", "AI"]
+DOPPELVOKALE = ["AA", "AH", "EE", "EH", "UH", "OH", "OO", "IE"]
+\end{lstlisting}
+Hier die Klasse \textit{PasswordGenerator} mit allen Methoden.
+\begin{lstlisting}
+class PasswordGenerator:
+    def __init__(self):
+        self.password = ""              # Initialisierung des Passwort-Strings
+        self.i = 0                      # Laufvariable, Position im Password-String
+        self.letter_num = False         # Flag, dass sagt, dass das letzte Zeichen eine Zahl war
+        self.jemals_num = False         # Flag, dass ich setze, wenn eine Zahl kommt
+        self.jemals_gross = False       # Flag, dass ich setze, wenn ein Grossbuchstabe kommt
+        self.vokal = None               # Flag, dass sagt, dass das letze Zeichen ein Vokal war
+
+    def create_password(self, length):
+         if length < MINLAENGE:          # Pruefung, ob die minimale Passwortlaenge gegeben ist
+            print(f"Length too short, minimum {MINLAENGE} letters!")
+            return "error"
+
+        # Erstes Zeichen des Passworts
+        letter = self._first_letter_algorithm(length)
+        self.password += letter
+
+        # Mittlere Zeichen (meist zweites, ggf. 3./4. je nach Laenge ersten Zeichenfolge)
+        while self.i < length - 1:
+            if self.letter_num:                     # Wenn letztes Zeichen Zahl, 
+                                                    # wieder die Fkt des ersten Zeichens
+                self.letter_num = False
+                letter = self._first_letter_algorithm(length)
+            else:
+                self.letter_num = False
+                random_num = self._random_num()     # Zufallszahl zwischen 1 und 100
+                if random_num <= 10:                # Mit 10% Wahrsch eine Zahl
+                    letter = str(randrange(0, 9))
+                    self.letter_num = True
+                    self.jemals_num = True
+                    self.i += 1
+                elif self.vokal:                    # Vorher Vokal, also nun Konsonant
+                    self.vokal = False
+                    if random_num <= 75:            # Einfacher Konsonant mit (75-10)%= 65% Wahrsch
+                        if self._random_konsonant():
+                            letter = choice(KONSONANTEN).lower()
+                        else:
+                            letter = choice(KONSONANTEN_SELTEN).lower()
+                        self.i += 1
+                    elif random_num <= 90:          # Doppelkonsonant mit (90-75)%= 15% Wahrsch
+                        letter = choice(DOPPELKONSONANTEN).lower()
+                        self.i += 2
+                    else:                           # Sonderfolge mit 10% Wahrsch.
+                        if length-self.i > 3:       # inkl. 3-Zeichen langer Sonderfolgen nur,
+                                                    # wenn es noch passt
+                            letter = choice(SONDERFOLGEN).lower()
+                        else:
+                            letter = choice(SONDERFOLGEN_2).lower()
+                        self.i += len(letter)
+
+                else:                               # Vorher Konsonant, also nun Vokal
+                    self.vokal = True
+                    if random_num <= 80:            # Einfacher Vokal mit 80-15%= 65% Wahrsch
+                        letter = choice(VOKALE).lower()
+                        self.i += 1
+                    elif random_num <= 90:          # Doppelvokal mit 10% Wahrsch
+                        letter = choice(DOPPELVOKALE).lower()
+                        self.i += 2
+                    else:                           # Umlaut mit 10% Wahrsch
+                        letter = choice(UMLAUTE).lower()
+                        self.i += 2
+            self.password += letter
+
+        # Da ich Doppelfolgen von Buchstaben zulasse, kann es bei der vorherigen while-Schleife sein,
+        # dass schon die geforderte Anzahl an Buchstaben erreicht ist.
+        # In der Regel ist aber noch eine Stelle frei. Diese wird nun besetzt.
+        # Ich nutze dies, um eine Zahl zu vergeben, wenn noch keine im Wort ist
+        
+        if len(self.password) < length:             # Noch ein Zeichen Platz am Ende        
+            if  self.jemals_num == False:
+                letter = str(randrange(0, 9))
+                self.letter_num = True
+                self.jemals_num = True
+
+            else:
+                if self.vokal == True:
+                    if self._random_konsonant():
+                        letter = choice(KONSONANTEN).lower()
+                    else:
+                        letter = choice(KONSONANTEN_SELTEN).lower()
+                else:
+                    letter = choice(VOKALE).lower()
+            self.i += 1
+            self.password += letter
+
+        else:                                   # Alle zeichen schon voll
+            if self.jemals_num == False:        # Sonderfall keine Zahl --> Zahl ans Ende
+                # self.password = str(randrange(0, 9)) + self.password[1:]
+                self.password = self.password[:-1] + str(randrange(0, 9))
+                # print("Letzten Buchstaben zur Zahl gemacht")
+
+        if self.jemals_gross == False:          # Sonderfall kein grosser Buchstabe -> 1. ersetzen
+            if not self.password[0].isnumeric():
+                self.password = self.password.capitalize()
+            else:
+                str1 = ""
+                cap = False
+                for x in self.password:
+                    if not cap and not x.isnumeric():
+                        x = x.upper()
+                        cap = True
+                    str1 += x
+                self.password = str1
+
+        return self.password
+
+    # Liefert ein zufaelliges erstes Zeichen bzw. eine Zeichenfolge;
+    # Wird auch aufgerufen nach Zahl im Passwort
+    
+    def _first_letter_algorithm(self, length):
+        random_num = self._random_num()             # Zufallszahl zwischen 1 und 100
+        letter = ""
+        self.letter_num = False
+        self.vokal = False
+
+        if random_num <= 30:                        # Einfacher Vokal mit 30% Wahrsch
+            if self._random_capital():              # Grossbuchstabe mit gewisser Wahrsch. (aktuell 75%)
+                letter = choice(VOKALE)
+                self.jemals_gross = True
+            else:                                   # Kleinbuschstabe mit gewisser Wahrsch
+                letter = choice(VOKALE).lower()
+            self.vokal = True
+            self.i += 1
+
+        elif random_num <= 40:                      # Umlaut mit 10% (am Anfang kein Doppelvokal)
+            if self._random_capital():              # Grossbuchstabe am Anfang
+                letter = choice(UMLAUTE).lower().capitalize()
+                self.jemals_gross = True
+            else:                                   # Kleinbuchstabe am Anfang
+                letter = choice(UMLAUTE).lower()
+            self.vokal = True
+            self.i += 2
+
+        elif random_num <= 75:                      # Einfacher Konsonant mit 35%
+            if self._random_konsonant():
+                kons = choice(KONSONANTEN)
+            else:
+                kons = choice(KONSONANTEN_SELTEN)
+            if self._random_capital():              # Grossbuchstabe
+                letter = kons
+                self.jemals_gross = True
+            else:                                   # Kleinbuchstabe
+                letter = kons.lower()
+            self.i += 1
+
+        elif random_num <= 85:                      # Sonderfolge mit 10%
+            if length-self.i < 3:                   # Diese Abfrage braucht es eigentlich nicht mehr
+                if self._random_capital():
+                    letter = choice(SONDERFOLGEN_ANFANG_2).lower().capitalize()
+                    self.jemals_gross = True
+                else:
+                    letter = choice(SONDERFOLGEN_ANFANG_2).lower()
+            else:
+                if self._random_capital():
+                    letter = choice(SONDERFOLGEN_ANFANG).lower().capitalize()
+                    self.jemals_gross = True
+                else:
+                    letter = choice(SONDERFOLGEN_ANFANG).lower()
+            self.i+= len(letter)
+
+        else:                                   # also 15% Wahrsch. --> Zahl
+            letter = str(randrange(0, 9))
+            self.letter_num = True
+            self.jemals_num = True
+            self.i += 1
+
+        return letter
+
+    def _random_capital(self):
+        # Liefert mit 75% Wahrscheinlichkeit True, sonst False
+        return self._random_num() > 25
+
+    def _random_konsonant(self):
+        # Liefert mit 90% Wahrscheinlichkeit True, sonst False
+        return self._random_num() > 10
+
+    def _random_num(self):
+        # Zufallszahl zwischen 1 und 100
+        return randrange(1, 100)
+
+# Hier noch fder Aufruf zur Genierierung von Beispielen 
+for x in range(25):
+    client = PasswordGenerator()
+    pw = client.create_password(8)
+    print(pw, len(pw))
+    client = PasswordGenerator()
+    pw = client.create_password(10)
+    print(pw, len(pw))
+    client = PasswordGenerator()
+    pw = client.create_password(14)
+    print(pw, len(pw))
+\end{lstlisting}
+\end{document}

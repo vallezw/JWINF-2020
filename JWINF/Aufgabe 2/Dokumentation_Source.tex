@@ -1,0 +1,186 @@
+\documentclass[a4paper,10pt,ngerman]{scrartcl}
+\usepackage{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage[a4paper,margin=2.5cm,footskip=0.5cm]{geometry}
+
+% Die nächsten vier Felder bitte anpassen:
+\newcommand{\Aufgabe}{Aufgabe 2: Baulwürfe} % Aufgabennummer und Aufgabennamen angeben
+\newcommand{\Namen}{Valentin Stephan Zwerschke}           % Namen der Bearbeiter/-innen dieser Aufgabe angeben
+ 
+% Kopf- und Fußzeilen
+\usepackage{scrlayer-scrpage, lastpage}
+\setkomafont{pageheadfoot}{\large\textrm}
+\lohead{\Aufgabe}
+\cfoot*{\\\thepage{}/\pageref{LastPage}}
+
+% Position des Titels
+\usepackage{titling}
+\setlength{\droptitle}{-1.0cm}
+
+% Für mathematische Befehle und Symbole
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Für Bilder
+\usepackage{graphicx}
+
+% Für Algorithmen
+\usepackage{algpseudocode}
+
+% Für Quelltext
+\usepackage{listings}
+\usepackage{color}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+  language=Python,
+  keywordstyle=\color{blue},commentstyle=\color{mygreen},
+  stringstyle=\color{mymauve},rulecolor=\color{black},
+  basicstyle=\footnotesize\ttfamily,numberstyle=\tiny\color{mygray},
+  captionpos=b, % sets the caption-position to bottom
+  keepspaces=true, % keeps spaces in text
+  numbers=left, numbersep=5pt, showspaces=false,showstringspaces=true,
+  showtabs=false, stepnumber=2, tabsize=2, title=\lstname
+}
+\lstdefinelanguage{JavaScript}{ % JavaScript ist als einzige Sprache noch nicht vordefiniert
+  keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, void, while, with},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true
+}
+
+% Diese beiden Pakete müssen zuletzt geladen werden
+%\usepackage{hyperref} % Anklickbare Links im Dokument
+\usepackage{cleveref}
+
+% Daten für die Titelseite
+\title{\textbf{\Huge\Aufgabe}}
+\author{\LARGE \Namen\\\\}
+\date{\LARGE\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\vspace{0.5cm}
+
+\section{Lösungsidee}
+In einem ersten Schritt suche ich prinzipiell in allen Zeilen des Feldes nach den Dreierkombinationen, aus denen die Rechtecke aufgebaut sind. Ich unterscheide dabei volle (\textit{XXX}) und leere (\textit{X X}) Dreierkombinationen. Für beide Typen lege ich separate Listen an, deren Einträge jeweils Zeilen- und Spalteninformation der Postion auf dem Feld sind.\\
+In einem zweiten Schritt durchlaufe ich dann die Liste der gefundenen \textit{XXX}-Kombinationen und prüfe, ob es entsprechend darunter liegende \textit{X X}- und \textit{XXX}-Kobinationen in den beiden Listen gibt. Falls dem so ist erhöhe ich einen Zähler, der bei Null startet.    
+Diese Methode nutzt die Bedingung, dass sich die Rechtecke nicht überlappen.
+\section{Umsetzung}
+Mein Programm habe ich in der Programmiersprache Python umgesetzt.\\Zuerst werden mittels einer kleinen Routine die Baulwurffelder aus der gewünschten Textdatei, die ich der Routine als String übergebe, in ein zweidimensionales Array eingelesen. Dabei speichere ich es durch Boolsche Variablen False bzw. True, um Speicherplatz zu sparen.\\Für den ersten Schritt, dem Auffinden von Dreierkombinationen, lege ich zwei Listen an
+\begin{itemize}
+    \item \textit{combs\_middle:} enthält alle gefundenen Dreierkombinationen vom Typ \textit{XXX}  (also die oberen und unteren Deckel der Rechtecke). Die Liste besteht aus Listen mit zwei Elementen, die jeweils die Zeile und Spalte des ersten Zeichens der Kombination beinhalten
+    \item \textit{combs\_leer:} enthält alle gefundenen Dreierkombinationen vom Typ \textit{X X} (also die mittleren Reihen der Rechtecke). Die Liste enthält jeweils die Zeile und Spalte des ersten Zeichens der Kombination
+\end{itemize}
+Ich arbeite mit zwei verschachtelten for-Schleifen. Die erste, mit der Variablen \textit{x}, durchläuft die Zeilen des Arrays. Für jede Zeile durchläuft die zweite Variable, \textit{i}, die Spalten. Wird eine Baulwurfhügel an der Position \textit{x,i} gefunden, also ist an der Stelle \textit{True} im Array \textit{file\_list[x][i]}, dann wird mit mehreren if-Abfragen geprüft, ob es eine der gesuchten Dreierkombos ist. Im Grunde gibt es ein definiertes Vorgehen für \textit{XXX} und eines für \textit{X X}, die ich allerdings in der Schleife zusammengefasst habe, was es tatsächlich etwas komplizierter aussehen lässt, als es tatsächlich ist. In der Schleife nutze ich mehrere Flags bzw. Variablen. 
+\begin{itemize}
+    \item \textit{last\_i:} Variable, der eine Zahl zugewiesen wird (Spaltenindex eines möglichen ersten Hügels in einer Reihe), wenn ein Hügel vorhanden ist; die Variable wird bei jeder neuen Zeile mit \textit{None} initialisiert und beim Durchlaufen der Spalten entsprechend aktualisiert
+    \item \textit{last\_i\_2:} Variable, der eine Zahl zugewiesen wird (Spaltenindex eines zweiten Hügels in einer Reihe), wenn auf der vorigen Position (\textit{last\_i}) ein Hügel ist; die Variable wird bei jeder neuen Zeile mit \textit{None} initialisiert und beim Durchlaufen der Spalten entsprechend aktualisiert
+    \item \textit{comb:} Variable, der eine Zahl zugeswiesen wird (Spaltenindex eines dritten bzw. letzten Hügels in einer Reihe), wenn auf der vorigen Position (\textit{last\_i\_2}) ein Hügel ist; die Variable wird bei jeder neuen Zeile mit \textit{None} initialisiert und beim Durchlaufen der Spalten entsprechend aktualisiert   
+    \item \textit{leer\_combo:} Flag (Boolsche Variable), das mir eine mögliche \textit{X X} Kombination anzeigt
+    \item \textit{end:} Flag, dass verwendet wird, um den Spezialfall von vier oder mehr Hügeln hintereinander in einer Reihe zu behandeln. Die Variable wird \textit{True} gesetzt, sobald vier Hügel hintereinander folgen.    
+\end{itemize} 
+Im Detail: 
+Fangen wir mit dem einfachen Fall an:
+\begin{itemize}
+    \item An der Stelle \textit{file\_list[x][i]} wird kein Baulwurfhügel gefunden. In diesem Fall kann es sein, dass wir in der Mitte einer \textit{X X} sind. Dies prüfen wir mit der Variablen \textit{last\_i}. Ist diese mit einer Zahl definiert, so setze ich das Flag \textit{leer\_combo} auf \textit{True}, um anzuzeigen, dass wir genau diesen Fall haben. Ansonsten setzen ich \textit{leer\_combo} auf \textit{False}, um zu wissen, dass wir nicht in diesem Fall sind. Wir wissen aber in beiden Fällen, dass wir keinesfalls in einer Folge von Baulwurfhügeln sind und setzen daher die Variablen \textit{last\_i}, \textit{last\_i\_2} und \textit{comb} auf \textit{None}. Wir können nun in der verschachtelten Schleife ein Feld weiter gehen.
+\item An der Stelle \textit{file\_list[x][i]} wird ein Baulwurfhügel gefunden.
+Wir setzen zunächst das Flag \textit{end} auf \textit{False}. Dann prüfen wir, ob es an der vorherigen Stelle einen Baulwurfhügel gab. Fangen wir wieder mit dem einfacheren Fall an: es gab keinen. Dann mache ich in die Liste der \textit{X X}-Kombinationen (also \textit{combs\_leer}) einen Eintrag, sofern das Flag \textit{leer\_combo} gesetzt ist. In jedem Fall setze ich für den nächsten Schritt die Variable \textit{last\_i} auf die Spaltenposition \textit{i} und setze \textit{leer\_combo} wieder auf \textit{False}. 
+Im Fall, dass das letzte Feld auch einen Baulwurfhügel hatte gibt es wieder zwei Fälle zu unterscheiden. Es gab entweder nur einen  oder bereits zwei oder mehr Hügel.  
+\begin{itemize}
+    \item Es gab nur einen (meine Variable \textit{last\_i\_2} ist nicht gesetzt): wir setzen \textit{last\_i\_2} auf den aktuellen Wert \textit{i}
+    \item Es gab bereits zwei (meine Variable \textit{last\_i\_2} ist gesetzt): Wir sind also fündig geworden mit einer \textit{XXX} Kombination. Wieder gibt es zwei Möglichkeiten: 
+    \begin{itemize}
+        \item Wir sind genau bei einem dritten Hügel in der Reihe (Die Variable \textit{comb} ist nicht gesetzt). Wir setzen \textit{comb} auf die akutellen Wert \textit{i}. 
+        \item Wir sind bei vier oder mehr Hügeln in einer Reihe (die Variable \textit{comb} ist gesetzt):  Ich speichere die gefundenen Kombination \textit{XXX} in die Liste \textit{combs\_middle} ab und bereite den check der nächsten Position vor, indem ich nacheinander \textit{last\_i} auf \textit{last\_i\_2} und \textit{last\_i\_2} auf \textit{comb} und \textit{comb} auf \textit{i} setze. Zudem setze ich das Flag \textit{end}, um festzuhalten, dass die Kombination bereits in die Liste \textit{combs\_middle} aufgenommen wurde. 
+    \end{itemize}
+\end{itemize}
+Bevor ich zum nächsten Feld gehe, prüfe ich, ob wir Dreierkombination gefunden haben (die Variable \textit{comb} ist gesetzt) und nicht der Sonderfall von vier oder mehr Hügeln in einer Reihe vorhanden ist (das Flag \textit{end} ist \textit{False}). Wenn beides zutrifft, nehme ich die Kombination in die Liste der \textit{XXX}-Kombinationen (Liste \textit{combs\_middle}) auf. Dann geht es in der Schleife weiter, bis alle Felder ausgewertet sind.
+\end{itemize}
+Im zweiten Schritt werte ich die Listen \textit{combs\_middle} und \textit{combs\_leer} aus und suche die Rechtecke. Dazu verwende ich noch eine dritte Liste, \textit{full\_leer\_comb}. Diese enthält alle 9-er Kominationen vom Typ \textit{XXX}, \textit{X X}, \textit{X X} in jeweils aufeinander folgenden Zeilen, die in ein und derselben Spalte sind. Abgespeichert werden jeweils zwei Werte, die Zeile und die Spalte, in der eine weitere \textit{XXX} Kobination gefunden werden müsste, um das Rechteck zu schließen, bildlich gesprochen also der untere Deckel des Baulwurf-Rechtecks.
+Mit einer verschachtelten for-Schleife, die in der ersten Ebenen alle Elemente der \textit{combs\_middle} Liste (also \textit{XXX}-Kombinationen) und in der zweiten Ebene die \textit{combs\_leer} Liste (also \textit{X X}-Kombinationen) durchgeht, wird mit if-Abfragen geprüft, ob diese Dreierkombinationen tatsächlich passend untereinander liegen (also in der gleiche Spalte und übereinander bezüglich Zeile). Mit einem Hilfsflag \textit{half\_com} (Typ Boolean) markiere ich zwischendurch, ob bei einer zwei zeilen unter einer \textit{XXX} Kombination bereits eine \textit{X X} Kombination existiert. Diese einfache Methode funktioniert, da die Einträge der Liste in erster Ordnung nach aufsteigender Zeilenfolge (in zweiter Ordnung nach Spalte) sortiert sind.
+In diesem und nur diesem Fall (also dem der oben beschriebenen 9er-Kombination), schreibe ich einen Eintrag in die Liste \textit{full\_leer\_comb} und prüfe mit einer weiteren if-Abfrage, ob diese Stelle in der Liste \textit{combs\_middle}, also den \textit{XXX}-Deckeln enthalten ist. Wenn das der Fall ist, habe ich ein Rechteck identifiziert und erhöhe den Zähler \textit{count}.
+Die Routinen lasse ich für allen 6 Karten hintereinander ablaufen und gebe jeweils die gefundene Zahl der Rechtecke aus.  
+\section{Beispiele}
+Hier die Ergebnisse, die mir das Programm für alle 6 Felder liefert:
+\begin{itemize}
+\item Karte 0: 7 Rechtecke
+\item Karte 1: 37 Rechtecke
+\item Karte 2: 32 Rechtecke
+\item Karte 3: 318 Rechtecke
+\item Karte 4: 3193 Rechtecke
+\item Karte 5: 20 Rechtecke
+\end{itemize}
+\section{Quellcode}
+Ich füge an dieser Stelle nur die beiden Teile der Hauptroutine ein. Den Aufruf und die File-Einleseroutine brauche ich sicherlich nicht abzudrucken.\\
+\textbf{Erster Teil} der Hauptroutine, in der ich die Dreierkombinationen im Array auffinde und die Positionen in die Liste speichere:
+\begin{lstlisting}
+combs_middle = []
+combs_leer = []
+for x in range(len(file_list)):             # x durchlaeuft die Zeilen im Feld
+    last_i = None                           # Erster Huegel einer moeglichen Dreierkombination XXX
+    last_i_2 = None                         # Zweiter Huegel einer moeglichen Dreierkombination XXX
+    comb = None                             # Dritter Huegel einer Dreierkombination XXX
+    leer_combo = False                      # Flag, dass mir sagt, ob ich an einem leeren Feld                                                  # moeglicherweise eine X X Kombination bin
+    end = False                             # Diese Flag wird True in dem Fall, dass vier oder mehr                                             # Hueglel aufeinader folgen
+    for i in range(len(file_list[x])):      # i durchlaeuft die Spalten in der x'ten Zeile
+        if file_list[x][i]:                 # True bedeutet Baulwurfhuegel (also X in der Textdatei)
+            end = False                     # Flag zum Start Initialisieren
+            if last_i is not None:          # Wir sind an der 2. Stelle einer moegl. Kombination XXX
+                if last_i_2 is not None:    # Wir sind an der 3. Stelle einer XXX Kombination
+                    if comb is not None:    # Wir haben 4 oder mehr Huegel hintereinander - Sonderfall
+                        end = True          # Flag des Sonderfalls wird gehisst
+                        combs_middle.append([x, comb]) # Sonderfall in der Liste eintragen
+                        last_i = last_i_2   # Vorbereitung naechstes Feld
+                        last_i_2 = comb     # Vorbereitung naechstes Feld
+                    comb = i                # Vorbereitung naechstes Feld, unabh. vom letzten if
+                else:                       # Das ist der Fall, dass wir auf einem Huegel sind und                                  # bereits genau einen davor hatten
+                    last_i_2 = i            # Vorbereitung naechstes Feld
+            else:                           # Das ist der Fall, dass wir auf einem Huegel stehen, 
+                                            # aber das vorige Feld leer ist
+                if leer_combo:              # Wir schauen in den Zwischenspeicher leer_combo, 
+                                            # ob der aktuelle Huegel eine Komb. X X vervollstaendigt
+                    combs_leer.append([x, i - 1])
+                last_i = i                  # Wir vemerken den letzten Huegel und weiter geht es
+                leer_combo = False          # In der naechsten Position sicher kein X X mehr
+            if comb is not None and not end:# hier tragen wir alle XXX Kombinationen ein, 
+                                            # die nicht Sonderfall mehr als vier sind
+                combs_middle.append([x, last_i_2])
+        else:                               # Wenn kein Baulwurfhuegel auf der Postion ist, 
+                                            # gibt es zwei Moeglichkeiten
+            if last_i is not None:
+                leer_combo = True           # Es koennte noch eine X X Kombination sein, 
+                                            # das merken wir uns fuer spaeter
+            else:
+                leer_combo = False          # Es ist keine X X Kombination, da zwei Positionen                                      # hintereinader ohne Huegel sind
+            last_i = None                   # In jedem Fall resetten wir jetzt wieder alle                                              # Flags/Variablen --> Suche beginnt neu
+            last_i_2 = None
+            comb = None
+\end{lstlisting}
+\textbf{Zweiter Teil} der Hauptroutine, in der ich aus den Listen die Rechtecke identifiziere und zähle:
+\begin{lstlisting}
+count = 0
+half_comb = False
+full_leer_comb = []
+for comb in combs_middle:
+    for new_comb in combs_leer:
+        if new_comb[0] == comb[0] + 1 and new_comb[1] == comb[1]:
+            if not half_comb:
+                half_comb = True
+                continue
+            
+            elif new_comb[0] == comb[0] + 2 and new_comb[1] == comb[1] and half_comb:
+                full_leer_comb.append([comb[0] + 3, comb[1]])
+                half_comb = False
+        
+        if comb in full_leer_comb:
+        count += 1
+\end{lstlisting}
+\end{document}

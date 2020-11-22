@@ -33,12 +33,12 @@ MINLAENGE = 5
 
 class PasswordGenerator:
     def __init__(self):
-        self.password = ""
-        self.i = 0
-        self.letter_num = False
-        self.jemals_num = False
-        self.jemals_gross = False
-        self.vokal = None
+        self.password = ""              # Initialisierung des Passwort-Strings
+        self.i = 0                      # Laufvariable, Position im Password-String
+        self.letter_num = False         # Flag, dass sagt, dass das letzte Zeichen eine Zahl war
+        self.jemals_num = False         # Flag, dass ich setze, wenn eine Zahl kommt
+        self.jemals_gross = False       # Flag, dass ich setze, wenn ein Grossbuchstabe kommt
+        self.vokal = None               # Flag, dass sagt, dass das letze Zeichen ein Vokal war
 
     def create_password(self, length):
         # Prüfung, ob die minimale Passwortlänge gegeben ist
@@ -46,12 +46,13 @@ class PasswordGenerator:
             print(f"Length too short, minimum {MINLAENGE} letters!")
             return "error"
 
-        # First char of password
+        # Erstes Zeichen des Passworts
         letter = self._first_letter_algorithm(length)
         self.password += letter
 
+        # Mittlere Zeichen (meist zweites, ggf. 3./4. je nach Länge ersten Zeichenfolge)
         while self.i < length - 1:
-            if self.letter_num:
+            if self.letter_num:                     # Wenn letztes Zeichen Zahl, wieder die Fkt des ersten Zeichens
                 self.letter_num = False
                 letter = self._first_letter_algorithm(length)
             else:
@@ -64,17 +65,17 @@ class PasswordGenerator:
                     self.i += 1
                 elif self.vokal:                    # Vorher Vokal, also nun Konsonant
                     self.vokal = False
-                    if random_num <= 75:            # Einfacher Konsonant mit 75-10%= 65% Wahrsch
+                    if random_num <= 75:            # Einfacher Konsonant mit (75-10)%= 65% Wahrsch
                         if self._random_konsonant():
                             letter = choice(KONSONANTEN).lower()
                         else:
                             letter = choice(KONSONANTEN_SELTEN).lower()
                         self.i += 1
-                    elif random_num <= 90:          # Doppelkonsonant
+                    elif random_num <= 90:          # Doppelkonsonant mit (90-75)%= 15% Wahrsch
                         letter = choice(DOPPELKONSONANTEN).lower()
                         self.i += 2
-                    else:
-                        if length-self.i > 3:
+                    else:                           # Sonderfolge mit 10% Wahrsch.
+                        if length-self.i > 3:       # inkl. 3-Zeichen langer Sonderfolgen nur, wenn es noch passt
                             letter = choice(SONDERFOLGEN).lower()
                         else:
                             letter = choice(SONDERFOLGEN_2).lower()
@@ -93,10 +94,11 @@ class PasswordGenerator:
                         self.i += 2
             self.password += letter
 
-        # Da wir ja doppelfolgen von Buchstaben zulassen, kann es bei der vorherigen while-Schleife sein, dass
-        # wir schon die geforderte Anzahl an Buchstaben haben. In der Regel ist aber noch eine Stelle frei.
-        # Diese wird nun besetzt. Wir nutzen es, um eine Zahl zu vergeben, wenn noch keine im Wort ist
-        if len(self.password) < length:
+        # Da ich Doppelfolgen von Buchstaben zulasse, kann es bei der vorherigen while-Schleife sein,
+        # dass schon die geforderte Anzahl an Buchstaben erreicht ist.
+        # In der Regel ist aber noch eine Stelle frei.
+        # Diese wird nun besetzt. Ich nutze dies, um eine Zahl zu vergeben, wenn noch keine im Wort ist
+        if len(self.password) < length:         # Noch ein Zeichen Platz am Ende
             if  self.jemals_num == False:
                 letter = str(randrange(0, 9))
                 self.letter_num = True
@@ -113,13 +115,13 @@ class PasswordGenerator:
             self.i += 1
             self.password += letter
 
-        else:
-            if self.jemals_num == False:
+        else:                                   # Alle zeichen schon voll
+            if self.jemals_num == False:        # Sonderfall keine Zahl --> Zahl ans Ende
                 # self.password = str(randrange(0, 9)) + self.password[1:]
                 self.password = self.password[:-1] + str(randrange(0, 9))
                 # print("Letzten Buchstaben zur Zahl gemacht")
 
-        if self.jemals_gross == False:
+        if self.jemals_gross == False:          # Sonderfall kein großer Buchstabe --> ersten ersetzen
             if not self.password[0].isnumeric():
                 self.password = self.password.capitalize()
             else:
@@ -131,14 +133,11 @@ class PasswordGenerator:
                         cap = True
                     str1 += x
                 self.password = str1
-            print("Ersten Buchstaben groß gemacht")
-
-        # Hier ist der seltene Fall, dass
-
 
         return self.password
 
-    # Liefert ein zufälliges erstes Zeichen bzw. eine Zeichenfolge
+    # Liefert ein zufälliges erstes Zeichen bzw. eine Zeichenfolge;
+    # Wird auch aufgerufen nach Zahl im Passwort
     def _first_letter_algorithm(self, length):
         random_num = self._random_num()             # Zufallszahl zwischen 1 und 100
         letter = ""
@@ -207,14 +206,18 @@ class PasswordGenerator:
         return self._random_num() > 10
 
     def _random_num(self):
-        # Random number between 1 and 100
+        # Zufallszahl zwischen 1 und 100
         return randrange(1, 100)
 
 
-for x in range(50):
+for x in range(25):
+    client = PasswordGenerator()
+    pw = client.create_password(8)
+    print(pw, len(pw))
     client = PasswordGenerator()
     pw = client.create_password(10)
     print(pw, len(pw))
-
-
+    client = PasswordGenerator()
+    pw = client.create_password(14)
+    print(pw, len(pw))
 
