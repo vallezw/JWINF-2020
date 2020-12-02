@@ -210,14 +210,6 @@ class PasswordGenerator:
         return randrange(1, 100)
 
 
-for x in range(25):
-    client = PasswordGenerator()
-    pw = client.create_password(8)
-    print(pw, len(pw))
-    client = PasswordGenerator()
-    pw = client.create_password(10)
-    print(pw, len(pw))
-    client = PasswordGenerator()
-    pw = client.create_password(14)
-    print(pw, len(pw))
-
+client = PasswordGenerator()
+pw = client.create_password(8)
+print(pw)
